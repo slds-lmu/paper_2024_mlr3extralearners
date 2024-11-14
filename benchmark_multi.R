@@ -7,25 +7,25 @@ library(mlr3batchmark)
 library(mlr3benchmark)
 source("helper.R")
 
-# unlink("/gscratch/mbecke16/benchmark-mlr3extralearners/registry_binary", recursive = TRUE)
+unlink("/gscratch/mbecke16/benchmark-mlr3extralearners/registry_multi", recursive = TRUE)
 
-# reg = makeExperimentRegistry(
-#   file.dir = "/gscratch/mbecke16/benchmark-mlr3extralearners/registry_binary",
-#   seed = 1,
-#   conf.file = "batchtools_conf.R",
-#   packages = c("renv", "mlr3extralearners", "mlr3learners")
-# )
-
-reg = loadRegistry(
-  file.dir = "/gscratch/mbecke16/benchmark-mlr3extralearners/registry_binary",
+reg = makeExperimentRegistry(
+  file.dir = "/gscratch/mbecke16/benchmark-mlr3extralearners/registry_multi",
+  seed = 1,
   conf.file = "batchtools_conf.R",
-  writeable = TRUE)
+  packages = c("renv", "mlr3extralearners", "mlr3learners")
+)
+
+# reg = loadRegistry(
+#   file.dir = "/gscratch/mbecke16/benchmark-mlr3extralearners/registry_multi",
+#   conf.file = "batchtools_conf.R",
+#   writeable = TRUE)
 
 # learner
 tab = list_mlr3learners()
 tab = tab[class == "classif"]
-tab[, twoclass := map(properties, function(x) "twoclass" %in% x)]
-tab = tab[twoclass == TRUE]
+tab[, multiclass := map_lgl(properties, function(x) "multiclass" %in% x)]
+tab = tab[multiclass == TRUE]
 
 learners = lrns(tab$id)
 
@@ -38,12 +38,11 @@ walk(learners, function(learner) {
 })
 
 # tasks and resamplings
-task_ids = c(10101L, 9971L, 125920L, 10093L, 37L, 15L, 49L, 146818L, 29L, 
-  146819L, 3913L, 9946L, 31L, 14954L, 3918L, 146820L, 9952L, 9957L, 
-  3917L, 3902L, 3903L, 167141L, 168912L, 3021L, 3L, 9978L, 3904L, 
-  43L, 34539L, 14952L, 219L, 168911L, 7592L, 14965L, 9976L, 167120L, 
-  146606L, 9977L, 167125L, 9910L, 168908L, 3945L, 168868L, 168337L, 
-  168338L)[1:20]
+task_ids = c(11L, 3560L, 23L, 146821L, 53L, 2079L, 18L, 3549L, 146822L, 
+  146817L, 9960L, 45L, 146800L, 167119L, 22L, 16L, 2074L, 14L, 
+  14969L, 167140L, 32L, 9985L, 28L, 146212L, 9964L, 12L, 146824L, 
+  9981L, 146195L, 168330L, 14970L, 168910L, 168909L, 168331L, 146825L, 
+  3573L, 168332L, 167124L)[1:20]
 
 otasks = map(task_ids, otsk)
 tasks = as_tasks(otasks)
@@ -62,11 +61,11 @@ submitJobs(ids)
 waitForJobs()
 
 bmr = reduceResultsBatchmark()
-saveRDS("bmr_binary.rds", bmr)
+saveRDS("results/bmr_multi.rds", bmr)
 
 job_table = getJobTable()
 memory = read_memory(job_table$batch.id)
 job_table[, memory := memory]
 job_table = unnest(job_table, c("prob.pars", "algo.pars"))
 tab_memory = job_table[, list(task_id, learner_id, memory)]
-fwrite(tab_memory, "memory_binary.csv")
+fwrite(tab_memory, "memory_multi.csv")

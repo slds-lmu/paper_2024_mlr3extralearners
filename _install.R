@@ -1,3 +1,4 @@
+# install base packages
 renv::init(bare = TRUE)
 renv::install(c(
   "mlr-org/mlr3extralearners@rweka", 
@@ -7,8 +8,12 @@ renv::install(c(
   "mlr3oml",
   "qs",
   "remotes",
-  "RWeka"))
+  "RWeka",
+  "DiceKriging",
+  "mda",
+  "rsm"))
 
+# install learner dependencies
 library(mlr3extralearners)
 
 tab = list_mlr3learners()
