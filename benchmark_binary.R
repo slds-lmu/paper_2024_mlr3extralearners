@@ -62,11 +62,11 @@ submitJobs(ids)
 waitForJobs()
 
 bmr = reduceResultsBatchmark()
-saveRDS("bmr_binary.rds", bmr)
+saveRDS(bmr, "results/bmr_binary.rds")
 
 job_table = getJobTable()
 memory = read_memory(job_table$batch.id)
 job_table[, memory := memory]
 job_table = unnest(job_table, c("prob.pars", "algo.pars"))
 tab_memory = job_table[, list(task_id, learner_id, memory)]
-fwrite(tab_memory, "memory_binary.csv")
+fwrite(tab_memory, "results/memory_binary.csv")
